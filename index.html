@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#E7ECE6">
+<title>HeltecHub</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍅</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #E7ECE6; --surface: #F4F7F3; --ink: #17221F; --muted: #5F6D67;
+    --line: #C7D1CB; --focus: #D8432E; --rest: #2E7D72;
+    --phase: var(--focus);
+    --display: "Chakra Petch", "Avenir Next Condensed", system-ui, sans-serif;
+    --body: "Atkinson Hyperlegible", -apple-system, system-ui, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #111816; --surface: #19221F; --ink: #E3EAE6; --muted: #8E9C96;
+            --line: #2B3632; --focus: #F0654F; --rest: #4FB3A4; }
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html, body { margin: 0; }
+  body { background: var(--paper); color: var(--ink); font: 17px/1.45 var(--body);
+         -webkit-font-smoothing: antialiased; }
+  main { max-width: 440px; margin: 0 auto; padding: 16px 20px 40px; }
+  button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--phase); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; }
+
+  /* Cabeçalho */
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0 8px; }
+  .device { font: 600 20px/1.1 var(--display); letter-spacing: .02em; }
+  .device small { display: flex; align-items: center; gap: 6px; font: 400 14px var(--body); color: var(--muted); margin-top: 4px; }
+  .led { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .on .led { background: var(--rest); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rest) 25%, transparent); }
+  .connect { border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 8px 16px; font-weight: 700; }
+  .on .connect { border-color: var(--line); color: var(--muted); font-weight: 400; }
+
+  .notice { background: var(--surface); border-left: 4px solid var(--focus); padding: 12px 14px; margin: 8px 0 0; border-radius: 4px; font-size: 15px; }
+  .notice[hidden] { display: none; }
+
+  /* Mostrador */
+  .dial { position: relative; width: min(78vw, 300px); aspect-ratio: 1; margin: 20px auto 8px; }
+  .dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .track { stroke: var(--line); }
+  .arc { stroke: var(--phase); transition: stroke-dashoffset .9s linear, stroke .3s; }
+  .ticks line { stroke: var(--muted); stroke-width: 1.2; opacity: .5; }
+  .readout { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .phase { font: 600 17px var(--display); color: var(--phase); letter-spacing: .04em; }
+  .time { font: 500 clamp(56px, 19vw, 76px)/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .paused .time { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  .cycles { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+  .cycles i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--phase); }
+  .cycles i.done { background: var(--phase); }
+
+  /* Controles */
+  .controls { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; align-items: center; margin: 20px 0 32px; }
+  .primary { background: var(--phase); color: #fff; border: 0; border-radius: 999px; padding: 16px 0; font-weight: 700; font-size: 19px; }
+  .ghost { background: transparent; border: 1.5px solid var(--line); border-radius: 999px; padding: 12px 0; }
+
+  /* Seções */
+  section { border-top: 1.5px solid var(--line); padding: 18px 0 8px; }
+  h2 { font: 600 18px var(--display); margin: 0 0 12px; letter-spacing: .02em; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .row + .row { border-top: 1px dashed var(--line); }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-size: 20px; line-height: 1; }
+  .stepper output { min-width: 64px; text-align: center; font: 500 18px var(--display); font-variant-numeric: tabular-nums; }
+  .save { width: 100%; margin-top: 12px; border: 1.5px solid var(--ink); background: transparent; border-radius: 12px; padding: 12px; font-weight: 700; }
+  .save.dirty { background: var(--ink); color: var(--paper); }
+
+  .weather { display: flex; gap: 16px; align-items: baseline; }
+  .weather .temp { font: 500 44px/1 var(--display); }
+  .weather p { margin: 0; color: var(--muted); font-size: 15px; }
+  .weather p b { color: var(--ink); }
+  .meta { color: var(--muted); font-size: 14px; margin: 10px 0 12px; }
+  .sync { border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px; width: 100%; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
+           background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-size: 15px;
+           opacity: 0; transition: .25s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (prefers-reduced-motion: reduce) { .arc, .toast { transition: none; } .paused .time { animation: none; opacity: .6; } }
+</style>
+</head>
+<body>
+<main>
+  <header id="hdr">
+    <div class="device">HeltecHub
+      <small><span class="led"></span><span id="connText">Desconectado</span></small>
+    </div>
+    <button class="connect" id="btnConnect">Conectar</button>
+  </header>
+
+  <p class="notice" id="noBle" hidden>Este navegador não tem Bluetooth. No iPhone, abra esta página no app <b>Bluefy</b> (App Store).</p>
+
+  <div class="dial" id="dial">
+    <svg viewBox="0 0 240 240" aria-hidden="true">
+      <g class="ticks" id="ticks"></g>
+      <circle class="track" cx="120" cy="120" r="100" fill="none" stroke-width="10"/>
+      <circle class="arc" id="arc" cx="120" cy="120" r="100" fill="none" stroke-width="10" stroke-linecap="round"/>
+    </svg>
+    <div class="readout" aria-live="polite">
+      <div class="phase" id="phase">Pronto</div>
+      <div class="time" id="time">25:00</div>
+      <div class="cycles" id="cycles"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ghost" id="btnReset" disabled>Resetar</button>
+    <button class="primary" id="btnToggle" disabled>Iniciar</button>
+    <button class="ghost" id="btnSkip" disabled>Pular</button>
+  </div>
+
+  <section>
+    <h2>Tempos</h2>
+    <div class="row"><span>Foco</span><div class="stepper" data-key="w" data-min="1" data-max="180" data-unit="min"></div></div>
+    <div class="row"><span>Pausa curta</span><div class="stepper" data-key="s" data-min="1" data-max="60" data-unit="min"></div></div>
+    <div class="row"><span>Pausa longa</span><div class="stepper" data-key="l" data-min="1" data-max="90" data-unit="min"></div></div>
+    <div class="row"><span>Focos até a pausa longa</span><div class="stepper" data-key="c" data-min="1" data-max="8" data-unit=""></div></div>
+    <button class="save" id="btnSave" disabled>Salvar tempos no ESP</button>
+  </section>
+
+  <section>
+    <h2>Dados enviados ao ESP</h2>
+    <div class="weather" id="weather">
+      <div class="temp" id="wTemp">--°</div>
+      <div><p><b id="wDesc">Sem clima ainda</b></p><p id="wExtra">Conecte para buscar pela sua localização</p></div>
+    </div>
+    <p class="meta" id="syncMeta">Hora e clima são enviados ao conectar e a cada 15 min.</p>
+    <button class="sync" id="btnSync" disabled>Sincronizar agora</button>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+const TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const PHASES = ['Pronto', 'Foco', 'Pausa', 'Pausa longa'];
+const WMO = c => c===0?'Céu limpo':c===1?'Pouco nublado':c===2?'Parcialmente nublado':c===3?'Nublado':
+  c<=48?'Neblina':c<=57?'Garoa':c<=67?'Chuva':c<=77?'Neve':c<=82?'Pancadas de chuva':'Tempestade';
+
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+let device, rxChar, writeChain = Promise.resolve(), manualDisconnect = false;
+let state = { phase:0, running:0, rem:1500, total:1500, done:0 };
+let cfg = { w:25, s:5, l:15, c:4 }, cfgDirty = false;
+let audio, wakeLock, syncTimer;
+
+/* ---------- Mostrador ---------- */
+const R = 100, CIRC = 2 * Math.PI * R;
+$('arc').style.strokeDasharray = CIRC;
+(() => { let g = ''; for (let i = 0; i < 60; i++) { const a = i / 60 * 2 * Math.PI, r1 = i % 5 ? 112 : 108;
+  g += `<line x1="${120+Math.cos(a)*r1}" y1="${120+Math.sin(a)*r1}" x2="${120+Math.cos(a)*116}" y2="${120+Math.sin(a)*116}"/>`; }
+  $('ticks').innerHTML = g; })();
+
+function render() {
+  const { phase, running, rem, total, done } = state;
+  const mm = String(Math.floor(rem / 60)).padStart(2, '0'), ss = String(rem % 60).padStart(2, '0');
+  $('time').textContent = `${mm}:${ss}`;
+  $('phase').textContent = PHASES[phase] + (phase && !running ? ' · pausado' : '');
+  document.documentElement.style.setProperty('--phase', phase >= 2 ? 'var(--rest)' : 'var(--focus)');
+  $('dial').classList.toggle('paused', phase > 0 && !running);
+  const prog = phase ? 1 - rem / total : 0;
+  $('arc').style.strokeDashoffset = CIRC * (1 - prog);
+  const filled = phase === 3 ? cfg.c : done % cfg.c;
+  $('cycles').innerHTML = Array.from({ length: cfg.c }, (_, i) => `<i class="${i < filled ? 'done' : ''}"></i>`).join('');
+  $('btnToggle').textContent = phase === 0 ? 'Iniciar' : running ? 'Pausar' : 'Continuar';
+  document.title = phase ? `${mm}:${ss} · ${PHASES[phase]}` : 'HeltecHub';
+}
+
+/* ---------- Steppers ---------- */
+document.querySelectorAll('.stepper').forEach(el => {
+  const k = el.dataset.key;
+  el.innerHTML = `<button aria-label="Diminuir">−</button><output></output><button aria-label="Aumentar">+</button>`;
+  const [minus, out, plus] = el.children;
+  const show = () => out.textContent = cfg[k] + (el.dataset.unit ? ' ' + el.dataset.unit : '');
+  const step = d => { cfg[k] = Math.min(+el.dataset.max, Math.max(+el.dataset.min, cfg[k] + d)); cfgDirty = true;
+                      $('btnSave').classList.add('dirty'); show(); render(); };
+  minus.onclick = () => step(k === 'c' ? -1 : cfg[k] > 10 ? -5 : -1);
+  plus.onclick  = () => step(k === 'c' ? 1 : cfg[k] >= 10 ? 5 : 1);
+  el.show = show; show();
+});
+const showCfg = () => document.querySelectorAll('.stepper').forEach(el => el.show());
+
+/* ---------- BLE ---------- */
+function send(msg) {
+  if (!rxChar) return Promise.resolve();
+  const data = enc.encode(msg);
+  writeChain = writeChain.then(() => rxChar.writeValueWithResponse ? rxChar.writeValueWithResponse(data) : rxChar.writeValue(data))
+                         .catch(e => console.warn('Falha ao enviar', msg, e));
+  return writeChain;
+}
+
+async function connect() {
+  if (device?.gatt?.connected) { manualDisconnect = true; device.gatt.disconnect(); return; }
+  initAudio();
+  try {
+    device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Heltec' }, { services: [SVC] }], optionalServices: [SVC] });
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+    await attach();
+  } catch (e) {
+    if (e.name !== 'NotFoundError') toast('Não conectou: ' + e.message);
+  }
+}
+
+async function attach() {
+  const server = await device.gatt.connect();
+  const svc = await server.getPrimaryService(SVC);
+  rxChar = await svc.getCharacteristic(RX);
+  const tx = await svc.getCharacteristic(TX);
+  await tx.startNotifications();
+  tx.addEventListener('characteristicvaluechanged', e => onMessage(dec.decode(e.target.value)));
+  manualDisconnect = false;
+  setConnected(true);
+  await syncTime();
+  send('G');
+  syncWeather();
+  clearInterval(syncTimer);
+  syncTimer = setInterval(() => { syncTime(); syncWeather(); }, 15 * 60 * 1000);
+  keepAwake();
+}
+
+async function onDisconnected() {
+  rxChar = null; setConnected(false); clearInterval(syncTimer);
+  if (manualDisconnect) return;
+  for (let i = 1; i <= 5 && !device.gatt.connected; i++) {       // tenta reconectar sozinho
+    $('connText').textContent = `Reconectando (${i}/5)…`;
+    await new Promise(r => setTimeout(r, 1500 * i));
+    try { await attach(); return; } catch {}
+  }
+  $('connText').textContent = 'Desconectado';
+}
+
+function setConnected(on) {
+  $('hdr').classList.toggle('on', on);
+  $('connText').textContent = on ? `Conectado a ${device.name || 'HeltecHub'}` : 'Desconectado';
+  $('btnConnect').textContent = on ? 'Desconectar' : 'Conectar';
+  ['btnToggle', 'btnSkip', 'btnReset', 'btnSave', 'btnSync'].forEach(id => $(id).disabled = !on);
+}
+
+function onMessage(msg) {
+  const [type, body = ''] = [msg[0], msg.slice(2)];
+  if (type === 'P') {
+    const [phase, running, rem, total, done, w, s, l, c] = body.split(';').map(Number);
+    state = { phase, running, rem, total, done };
+    if (!cfgDirty) { cfg = { w, s, l, c }; showCfg(); }
+    render();
+  } else if (type === 'E') {
+    beep(); toast(+body === 1 ? 'Pausa acabou — hora do foco' : 'Foco concluído — faça uma pausa');
+  } else if (type === 'R' && body === 'SYNC') {
+    syncTime(); syncWeather(); toast('O ESP pediu sincronização');
+  }
+}
+
+/* ---------- Hora e clima ---------- */
+function syncTime() {
+  const localEpoch = Math.floor(Date.now() / 1000) - new Date().getTimezoneOffset() * 60;
+  return send('T:' + localEpoch);
+}
+
+function getPosition() {
+  return new Promise((ok, fail) => navigator.geolocation
+    ? navigator.geolocation.getCurrentPosition(p => ok(p.coords), fail, { maximumAge: 30 * 60 * 1000, timeout: 15000 })
+    : fail(new Error('sem geolocalização')));
+}
+
+async function syncWeather() {
+  try {
+    const { latitude: lat, longitude: lon } = await getPosition();
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+                `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto`;
+    const cur = (await (await fetch(url)).json()).current;
+    let city = '';
+    try {
+      const g = await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`)).json();
+      city = (g.city || g.locality || '').replace(/;/g, ' ').slice(0, 20);
+    } catch {}
+    await send(`W:${cur.temperature_2m.toFixed(1)};${cur.relative_humidity_2m};${cur.weather_code};` +
+               `${cur.wind_speed_10m.toFixed(1)};${cur.is_day};${city}`);
+    $('wTemp').textContent = Math.round(cur.temperature_2m) + '°';
+    $('wDesc').textContent = WMO(cur.weather_code);
+    $('wExtra').textContent = `${city ? city + ', ' : ''}umidade ${cur.relative_humidity_2m}%, vento ${Math.round(cur.wind_speed_10m)} km/h`;
+    $('syncMeta').textContent = 'Última sincronização às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    $('wExtra').textContent = 'Clima indisponível: permita a localização no Bluefy e confira a internet.';
+  }
+}
+
+/* ---------- Som, tela acesa, aviso ---------- */
+function initAudio() { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch {} }
+function beep() {
+  if (!audio) return;
+  [0, .35, .7].forEach(t => { const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(.25, audio.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + t + .3);
+    o.start(audio.currentTime + t); o.stop(audio.currentTime + t + .3); });
+}
+async function keepAwake() { try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && device?.gatt?.connected) keepAwake(); });
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000); }
+
+/* ---------- Botões ---------- */
+$('btnConnect').onclick = connect;
+$('btnToggle').onclick = () => { initAudio(); send('C:TOGGLE'); };
+$('btnSkip').onclick   = () => send('C:SKIP');
+$('btnReset').onclick  = () => send('C:RESET');
+$('btnSave').onclick   = async () => { await send(`S:${cfg.w};${cfg.s};${cfg.l};${cfg.c}`); cfgDirty = false;
+                                       $('btnSave').classList.remove('dirty'); toast('Tempos salvos no ESP'); };
+$('btnSync').onclick   = async () => { await syncTime(); await syncWeather(); toast('Hora e clima enviados'); };
+
+if (!navigator.bluetooth) { $('noBle').hidden = false; $('btnConnect').disabled = true; }
+state.rem = state.total = cfg.w * 60;
+render();
+</script>
+</body>
+</html>
